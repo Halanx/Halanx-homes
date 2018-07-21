@@ -4,11 +4,11 @@ from Homes.models import *
 # Register your models here.
 
 
-@admin.register(HouseVisits)
+@admin.register(HouseVisit)
 class HouseVisitModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'house']
     class Meta:
-        model = HouseVisits
+        model = HouseVisit
 
 @admin.register(Amenity)
 class HouseVisitModelAdmin(admin.ModelAdmin):
