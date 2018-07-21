@@ -40,8 +40,9 @@ INSTALLED_APPS = [
 
     # 3rd party
     'rest_framework',
+    'multiselectfield',
 
-    #apps
+    # apps
     'Homes',
     'FAQ',
     'Contact'

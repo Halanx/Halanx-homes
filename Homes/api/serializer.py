@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from rest_framework import serializers
-from Homes.models import House,Amenity,HousePictures,HouseVisits
+from Homes.models import House,Amenity,HousePictures,HouseVisit
 from django.contrib.auth import get_user_model
 # Create your views here.
 
@@ -43,7 +43,7 @@ class HouseVisitSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     house = HouseSerializer(read_only=True)
     class Meta:
-        model = HouseVisits
+        model = HouseVisit
         fields = '__all__'
 
 
