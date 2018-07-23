@@ -9,6 +9,7 @@ from Homes.utils import (HouseTypeCategories, HouseFurnishTypeCategories, HouseA
                          HouseAccomodationTypeCategories, AmenityTypeCategories, get_house_picture_upload_path,
                          get_amenity_picture_upload_path, get_sub_amenity_picture_upload_path, FLAT)
 
+
 class MonthlyExpenseCategory(models.Model):
     name = models.CharField(max_length=100)
 
@@ -26,6 +27,7 @@ class HouseMonthlyExpense(models.Model):
     def __str__(self):
         return str(self.id)
 
+
 class Amenity(models.Model):
     name = models.CharField(max_length=50)
     category = models.CharField(max_length=25, blank=True, null=True, choices=AmenityTypeCategories)
@@ -34,6 +36,7 @@ class Amenity(models.Model):
     def __str__(self):
         return self.name
 
+
 class SubAmenity(models.Model):
     name = models.CharField(max_length=50)
     amenity = models.ForeignKey('Amenity', on_delete=models.CASCADE, related_name='sub_amenities')
@@ -41,6 +44,7 @@ class SubAmenity(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class HouseAmenity(models.Model):
     house = models.ForeignKey('House', on_delete=models.CASCADE, related_name='amenities')
@@ -99,10 +103,6 @@ class PrivateRoom(models.Model):
     def __str__(self):
         return str(self.id)
 
-    def save(self, *args, **kwargs):
-        super(PrivateRoom, self).save(*args, **kwargs)
-        self.house.update_availability()
-
 
 class Flat(models.Model):
     house = models.ForeignKey('House', on_delete=models.PROTECT, related_name='flats')
@@ -118,10 +118,6 @@ class Flat(models.Model):
 
     def __str__(self):
         return str(self.id)
-
-    def save(self, *args, **kwargs):
-        super(Flat, self).save(*args, **kwargs)
-        self.house.update_availability()
 
 
 class HouseOwner(models.Model):
@@ -166,15 +162,8 @@ class House(models.Model):
     def __str__(self):
         return str(self.id)
 
-    def update_availability(self):
-        self.available = any([room.available for room in self.private_rooms.all()] +
-                             [room.available for room in self.shared_rooms.all()] +
-                             [flat.available for flat in self.flats.all()])
-        super(House, self).save()
-
     def get_monthly_expenses(self, accomodation_type=FLAT):
         return self.monthly_expenses.filter(accomodation_type=accomodation_type)
-
 
 
 class HousePicture(models.Model):
@@ -199,9 +188,9 @@ class HousePicture(models.Model):
 
 
 class HouseVisit(models.Model):
-    house = models.ForeignKey('House', on_delete=models.SET_NULL,null=True, related_name='visits')
-    customer = models.ForeignKey('Customer', on_delete=models.SET_NULL,null=True, related_name='house_visits')
-    code = models.CharField(max_length=10, blank=True,null=True)
+    house = models.ForeignKey('House', on_delete=models.SET_NULL, null=True, related_name='visits')
+    customer = models.ForeignKey('Customer', on_delete=models.SET_NULL, null=True, related_name='house_visits')
+    code = models.CharField(max_length=10, blank=True, null=True)
     scheduled_visit_time = models.DateTimeField()
 
     is_visited = models.BooleanField(default=False)
