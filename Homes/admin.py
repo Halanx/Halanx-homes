@@ -16,7 +16,6 @@ class HouseVisitModelAdmin(admin.ModelAdmin):
     class Meta:
         model = Amenity
 
-
 @admin.register(SubAmenity)
 class HouseVisitModelAdmin(admin.ModelAdmin):
     list_display = ['id', 'name']
@@ -26,6 +25,10 @@ class HouseVisitModelAdmin(admin.ModelAdmin):
 class HomesMediaInline(admin.TabularInline):
     model = HousePicture
     extra = 0
+
+class HouseAmenityInline(admin.TabularInline):
+    model = HouseAmenity
+    extra = 1
 
 
 @admin.register(House)
@@ -37,4 +40,5 @@ class HouseModelAdmin(admin.ModelAdmin):
 
     inlines = [
         HomesMediaInline,
+        HouseAmenityInline
     ]
