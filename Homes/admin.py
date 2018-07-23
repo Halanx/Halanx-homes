@@ -24,7 +24,7 @@ class HouseVisitModelAdmin(admin.ModelAdmin):
         model = SubAmenity
 
 class HomesMediaInline(admin.TabularInline):
-    model = HousePictures
+    model = HousePicture
     extra = 0
 
 

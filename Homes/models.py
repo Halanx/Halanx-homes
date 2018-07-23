@@ -9,7 +9,6 @@ from Homes.utils import (HouseTypeCategories, HouseFurnishTypeCategories, HouseA
                          HouseAccomodationTypeCategories, AmenityTypeCategories, get_house_picture_upload_path,
                          get_amenity_picture_upload_path, get_sub_amenity_picture_upload_path, FLAT)
 
-
 class MonthlyExpenseCategory(models.Model):
     name = models.CharField(max_length=100)
 
@@ -27,7 +26,6 @@ class HouseMonthlyExpense(models.Model):
     def __str__(self):
         return str(self.id)
 
-
 class Amenity(models.Model):
     name = models.CharField(max_length=50)
     category = models.CharField(max_length=25, blank=True, null=True, choices=AmenityTypeCategories)
@@ -36,7 +34,6 @@ class Amenity(models.Model):
     def __str__(self):
         return self.name
 
-
 class SubAmenity(models.Model):
     name = models.CharField(max_length=50)
     amenity = models.ForeignKey('Amenity', on_delete=models.CASCADE, related_name='sub_amenities')
@@ -44,7 +41,6 @@ class SubAmenity(models.Model):
 
     def __str__(self):
         return self.name
-
 
 class HouseAmenity(models.Model):
     house = models.ForeignKey('House', on_delete=models.CASCADE, related_name='amenities')
@@ -128,6 +124,18 @@ class Flat(models.Model):
         self.house.update_availability()
 
 
+class HouseOwner(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.CharField(max_length=50)
+    phone = models.CharField(max_length=15)
+    address = models.CharField(max_length=200, null=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
 class House(models.Model):
     owner = models.ForeignKey('HouseOwner', on_delete=models.PROTECT, related_name='houses')
     name = models.CharField(max_length=150, blank=True, null=True)
@@ -168,17 +176,6 @@ class House(models.Model):
         return self.monthly_expenses.filter(accomodation_type=accomodation_type)
 
 
-class HouseOwner(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    email = models.CharField(max_length=50)
-    phone = models.CharField(max_length=15)
-    address = models.CharField(max_length=200, null=True)
-
-    def __str__(self):
-        return str(self.id)
-
 
 class HousePicture(models.Model):
     house = models.ForeignKey(House, on_delete=models.DO_NOTHING, related_name='pictures')
@@ -202,8 +199,8 @@ class HousePicture(models.Model):
 
 
 class HouseVisit(models.Model):
-    house = models.ForeignKey('House', on_delete=models.SET_NULL, related_name='visits')
-    customer = models.ForeignKey('Customer', on_delete=models.SET_NULL, related_name='house_visits')
+    house = models.ForeignKey('House', on_delete=models.SET_NULL,null=True, related_name='visits')
+    customer = models.ForeignKey('Customer', on_delete=models.SET_NULL,null=True, related_name='house_visits')
     code = models.CharField(max_length=10, blank=True,null=True)
     scheduled_visit_time = models.DateTimeField()
 
