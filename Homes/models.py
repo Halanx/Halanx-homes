@@ -1,13 +1,17 @@
+from random import randint
+
 from django.conf import settings
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils.safestring import mark_safe
 
 from multiselectfield import MultiSelectField
 
 from Homes.utils import (HouseTypeCategories, HouseFurnishTypeCategories, HouseAccomodationAllowedCategories,
                          HouseAccomodationTypeCategories, AmenityTypeCategories, get_house_picture_upload_path,
-                         get_amenity_picture_upload_path, get_sub_amenity_picture_upload_path, FLAT)
+                         get_amenity_picture_upload_path, get_sub_amenity_picture_upload_path, FLAT,
+                         get_house_owner_profile_pic_upload_path, default_profile_pic_url)
 
 
 class MonthlyExpenseCategory(models.Model):
@@ -33,8 +37,20 @@ class Amenity(models.Model):
     category = models.CharField(max_length=25, blank=True, null=True, choices=AmenityTypeCategories)
     image = models.ImageField(upload_to=get_amenity_picture_upload_path, null=True, blank=True)
 
+    class Meta:
+        verbose_name_plural = 'Amenities'
+
     def __str__(self):
         return self.name
+
+    def get_amenity_image_html(self):
+        if self.image:
+            return mark_safe('<img src="{}" width="80" height="80" />'.format(self.image.url))
+        else:
+            return None
+
+    get_amenity_image_html.short_description = 'Amenity Image'
+    get_amenity_image_html.allow_tags = True
 
 
 class SubAmenity(models.Model):
@@ -42,8 +58,20 @@ class SubAmenity(models.Model):
     amenity = models.ForeignKey('Amenity', on_delete=models.CASCADE, related_name='sub_amenities')
     image = models.ImageField(upload_to=get_sub_amenity_picture_upload_path, null=True, blank=True)
 
+    class Meta:
+        verbose_name_plural = 'Sub Amenities'
+
     def __str__(self):
         return self.name
+
+    def get_sub_amenity_image_html(self):
+        if self.image:
+            return mark_safe('<img src="{}" width="80" height="80" />'.format(self.image.url))
+        else:
+            return None
+
+    get_sub_amenity_image_html.short_description = 'SubAmenity Image'
+    get_sub_amenity_image_html.allow_tags = True
 
 
 class HouseAmenity(models.Model):
@@ -51,6 +79,9 @@ class HouseAmenity(models.Model):
     amenity = models.ForeignKey('Amenity', on_delete=models.CASCADE, related_name='house_amenities')
     sub_amenities = models.ManyToManyField('SubAmenity', related_name='house_sub_amenities')
     count = models.PositiveIntegerField(default=1)
+
+    class Meta:
+        verbose_name_plural = 'House Amenities'
 
     def __str__(self):
         return str(self.id)
@@ -122,14 +153,16 @@ class Flat(models.Model):
 
 class HouseOwner(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    email = models.CharField(max_length=50)
     phone = models.CharField(max_length=15)
     address = models.CharField(max_length=200, null=True)
+    profile_pic = models.ImageField(upload_to=get_house_owner_profile_pic_upload_path, null=True, blank=True)
 
     def __str__(self):
         return str(self.id)
+
+    @property
+    def name(self):
+        return self.user.get_full_name()
 
 
 class House(models.Model):
@@ -160,7 +193,7 @@ class House(models.Model):
     accomodation_allowed = MultiSelectField(max_length=25, max_choices=3, choices=HouseAccomodationAllowedCategories)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.name)
 
     def get_monthly_expenses(self, accomodation_type=FLAT):
         return self.monthly_expenses.filter(accomodation_type=accomodation_type)
@@ -193,11 +226,17 @@ class HouseVisit(models.Model):
     code = models.CharField(max_length=10, blank=True, null=True)
     scheduled_visit_time = models.DateTimeField()
 
-    is_visited = models.BooleanField(default=False)
+    visited = models.BooleanField(default=False)
+    cancelled = models.BooleanField(default=False)
     actual_visit_time = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return str(self.id)
+
+    def save(self, *args, **kwargs):
+        if self.id is not None:
+            self.code = randint(111111, 999999)
+        super(HouseVisit, self).save(*args, **kwargs)
 
 
 class Customer(models.Model):
@@ -205,14 +244,16 @@ class Customer(models.Model):
     This class will be later replaced by Halanx customer class
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    email = models.CharField(max_length=50)
     phone = models.CharField(max_length=15)
     address = models.CharField(max_length=200, null=True)
+    profile_pic_url = models.CharField(max_length=500, blank=True, null=True, default=default_profile_pic_url)
 
     def __str__(self):
         return str(self.id)
+
+    @property
+    def name(self):
+        return self.user.get_full_name()
 
 
 # noinspection PyUnusedLocal
