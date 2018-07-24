@@ -82,6 +82,7 @@ class FlatSerializer(serializers.ModelSerializer):
         exclude = ('visible',)
 
 
+
 class HouseDetailSerializer(serializers.ModelSerializer):
     owner = HouseOwnerBasicSerializer()
     pictures = HousePictureSerializer(many=True)

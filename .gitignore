@@ -10,7 +10,8 @@
 *.sql
 *.sqlite3
 
-eenvHalanx
+envHalanx/
+
 ### ElasticBeanstalk ###
 .elasticbeanstalk/
 ### JetBrains+all ###
