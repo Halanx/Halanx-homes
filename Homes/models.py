@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.safestring import mark_safe
+from geopy import units, distance
 
 from multiselectfield import MultiSelectField
 
@@ -103,6 +104,7 @@ class Bed(models.Model):
 
 class SharedRoom(models.Model):
     space = models.OneToOneField('Space', on_delete=models.PROTECT, null=True, related_name='shared_room')
+    bed_count = models.PositiveIntegerField(default=1)
     sharing_limit = models.PositiveIntegerField(default=1)
 
     def __str__(self):
@@ -111,10 +113,6 @@ class SharedRoom(models.Model):
     @property
     def available(self):
         return self.space.available
-
-    @property
-    def bed_count(self):
-        return self.beds.filter(visible=True).count()
 
     @property
     def free_bed_count(self):
@@ -159,6 +157,17 @@ class Space(models.Model):
         return str(self.name)
 
 
+class HouseManager(models.Manager):
+    @staticmethod
+    def nearby(latitude, longitude, distance_range=5):
+        queryset = House.objects.filter(visible=True)
+        rough_distance = units.degrees(arcminutes=units.nautical(kilometers=distance_range)) * 2
+        latitude, longitude = float(latitude), float(longitude)
+        queryset = queryset.filter(latitude__range=(latitude - rough_distance, latitude + rough_distance),
+                                   longitude__range=(longitude - rough_distance, longitude + rough_distance))
+        return queryset
+
+
 class House(models.Model):
     owner = models.ForeignKey('HouseOwner', on_delete=models.PROTECT, related_name='houses')
     name = models.CharField(max_length=150, blank=True, null=True)
@@ -168,7 +177,7 @@ class House(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True, auto_now=False)
     modified_at = models.DateTimeField(auto_now_add=False, auto_now=True)
-    available_from = models.DateField(null=True, blank=True)
+    available_from = models.DateTimeField(null=True, blank=True)
     available = models.BooleanField(default=True)
     visible = models.BooleanField(default=True)
 
@@ -185,6 +194,8 @@ class House(models.Model):
     available_accomodation_types = MultiSelectField(max_length=25, max_choices=3,
                                                     choices=HouseAccomodationTypeCategories)
     accomodation_allowed = MultiSelectField(max_length=25, max_choices=3, choices=HouseAccomodationAllowedCategories)
+
+    objects = HouseManager()
 
     def __str__(self):
         return str(self.name)
@@ -288,6 +299,8 @@ def update_house_availability(sender, instance, **kwargs):
 @receiver(post_save, sender=Bed)
 def update_room_availability(sender, instance, **kwargs):
     room = instance.room
+    room.bed_count = room.beds.filter(visible=True).count()
+    room.save()
     room.space.available = True if room.beds.filter(visible=True, available=True).count() else False
     room.space.save()
 

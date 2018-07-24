@@ -1,19 +1,31 @@
+APARTMENT = 'apartment'
+INDEPENDENT = 'independent'
+VILLA = 'villa'
+
 HouseTypeCategories = (
-    ('Apartment', 'Apartment'),
-    ('Independent', 'Independent'),
-    ('Villa', 'Villa'),
+    (APARTMENT, 'Apartment'),
+    (INDEPENDENT, 'Independent'),
+    (VILLA, 'Villa'),
 )
+
+FULLY_FURNISHED = 'full'
+SEMI_FURNISHED = 'semi'
+UNFURNISHED = 'nil'
 
 HouseFurnishTypeCategories = (
-    ('Fully furnished', 'Fully furnished'),
-    ('Semi furnished', 'Semi furnished'),
-    ('Unfurnished', 'Unfurnished')
+    (FULLY_FURNISHED, 'Fully furnished'),
+    (SEMI_FURNISHED, 'Semi furnished'),
+    (UNFURNISHED, 'Unfurnished')
 )
 
+GIRLS = 'girls'
+BOYS = 'boys'
+FAMILY = 'family'
+
 HouseAccomodationAllowedCategories = (
-    ('Girls', 'Girls'),
-    ('Boys', 'Boys'),
-    ('Family', 'Family')
+    (GIRLS, 'Girls'),
+    (BOYS, 'Boys'),
+    (FAMILY, 'Family')
 )
 
 FLAT = 'flat'
@@ -21,9 +33,9 @@ PRIVATE_ROOM = 'private'
 SHARED_ROOM = 'shared'
 
 HouseAccomodationTypeCategories = (
-    ('shared', 'Shared rooms'),
-    ('private', 'Private rooms'),
-    ('flat', 'Entire house'),
+    (SHARED_ROOM, 'Shared rooms'),
+    (PRIVATE_ROOM, 'Private rooms'),
+    (FLAT, 'Entire house'),
 )
 
 AmenityTypeCategories = (

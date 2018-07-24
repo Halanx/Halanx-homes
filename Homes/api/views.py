@@ -1,3 +1,4 @@
+from django.db.models import Q
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -8,6 +9,7 @@ from rest_framework.generics import (RetrieveAPIView, ListAPIView, ListCreateAPI
 from Homes.api.serializers import (HouseVisitSerializer, HouseDetailSerializer, HouseListSerializer,
                                    HouseVisitListSerializer)
 from Homes.models import House, Customer, HouseVisit
+from utility.time_utils import get_datetime
 
 
 class HouseListView(ListAPIView):
@@ -18,7 +20,58 @@ class HouseListView(ListAPIView):
     serializer_class = HouseListSerializer
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [BasicAuthentication, TokenAuthentication]
-    queryset = House.objects.filter(visible=True)
+
+    def get_queryset(self):
+        params = self.request.query_params
+        latitude = params.get('latitude')
+        longitude = params.get('longitude')
+        radius = params.get('radius', 5)
+        rent_max = params.get('rent_max')
+        rent_min = params.get('rent_min')
+        available_from = params.get('available_from')
+        furnish_type = params.get('furnish_type')
+        house_type = params.get('house_type')
+        accomodation_types = params.get('accomodation_type')
+        accomodation_allowed = params.get('accomodation_allowed')
+        flat_bhk_count = params.get('flat_bhk_count')
+        shared_room_bed_count = params.get('shared_room_bed_count')
+
+        if latitude and longitude:
+            queryset = House.objects.nearby(latitude, longitude, radius)
+        else:
+            queryset = House.objects.filter(visible=True)
+
+        myquery = Q()
+
+        if rent_max:
+            myquery &= Q(rent_lte=rent_max)
+
+        if rent_min:
+            myquery &= Q(rent_gte=rent_min)
+
+        if available_from:
+            myquery &= Q(available_from__lte=get_datetime(available_from))
+
+        if furnish_type:
+            myquery &= Q(furnish_type__in=furnish_type.split(','))
+
+        if house_type:
+            myquery &= Q(house_type__in=house_type.split(','))
+
+        if accomodation_types:
+            myquery &= Q(available_accomodation_types__in=accomodation_types.split(','))
+
+        if accomodation_allowed:
+            myquery &= Q(accomodation_allowed__in=accomodation_allowed.split(','))
+
+        if flat_bhk_count:
+            myquery &= Q(spaces__flat__bhk_count__in=flat_bhk_count.split(','))
+
+        if shared_room_bed_count:
+            myquery &= Q(spaces__shared_room__bed_count__in=shared_room_bed_count.split(','))
+
+        queryset = queryset.filter(myquery)
+        return queryset
 
 
 class HouseRetrieveView(RetrieveAPIView):
