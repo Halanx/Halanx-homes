@@ -1,6 +1,7 @@
 from django.contrib import admin
 from Homes.models import (House, HousePicture, HouseOwner, HouseMonthlyExpense, HouseAmenity, Amenity, SubAmenity,
-                          HouseVisit, MonthlyExpenseCategory)
+                          HouseVisit, MonthlyExpenseCategory, Space, Flat, PrivateRoom, SharedRoom, Customer)
+from Homes.utils import FLAT, PRIVATE_ROOM, SHARED_ROOM
 
 
 @admin.register(HouseVisit)
@@ -57,6 +58,21 @@ class HouseMonthlyExpenseInline(admin.TabularInline):
     extra = 1
 
 
+class FlatInline(admin.TabularInline):
+    model = Flat
+    extra = 0
+
+
+class SharedRoomInline(admin.TabularInline):
+    model = SharedRoom
+    extra = 0
+
+
+class PrivateRoomInline(admin.TabularInline):
+    model = PrivateRoom
+    extra = 0
+
+
 @admin.register(House)
 class HouseModelAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'owner', 'available')
@@ -71,6 +87,59 @@ class HouseModelAdmin(admin.ModelAdmin):
     )
 
 
+@admin.register(Space)
+class SpaceModelAdmin(admin.ModelAdmin):
+    list_display = ('id', 'house', 'name', 'available', 'visible')
+
+    class Meta:
+        model = Space
+
+    inlines = (
+        FlatInline,
+        PrivateRoomInline,
+        SharedRoomInline
+    )
+
+    def get_inline_instances(self, request, obj=None):
+        # Return no inlines when obj is being created
+        if not obj:
+            return []
+
+        inline_instances = super(SpaceModelAdmin, self).get_inline_instances(request, obj)
+        if obj.type == FLAT:
+            return [x for x in inline_instances if isinstance(x, FlatInline)]
+        elif obj.type == PRIVATE_ROOM:
+            return [x for x in inline_instances if isinstance(x, PrivateRoomInline)]
+        elif obj.type == SHARED_ROOM:
+            return [x for x in inline_instances if isinstance(x, SharedRoomInline)]
+        else:
+            return []
+
+
+@admin.register(Flat)
+class FlatModelAdmin(admin.ModelAdmin):
+    list_display = ('id', 'space', 'bhk_count')
+
+    class Meta:
+        model = Flat
+
+
+@admin.register(PrivateRoom)
+class PrivateRoomModelAdmin(admin.ModelAdmin):
+    list_display = ('id', 'space')
+
+    class Meta:
+        model = PrivateRoom
+
+
+@admin.register(SharedRoom)
+class SharedRoomModelAdmin(admin.ModelAdmin):
+    list_display = ('id', 'space', 'sharing_limit')
+
+    class Meta:
+        model = SharedRoom
+
+
 @admin.register(HouseOwner)
 class HouseOwnerModelAdmin(admin.ModelAdmin):
     list_display = ('id', 'user')
@@ -81,3 +150,9 @@ class HouseOwnerModelAdmin(admin.ModelAdmin):
     inlines = (
         HouseInline,
     )
+
+
+@admin.register(Customer)
+class CustomerModelAdmin(admin.ModelAdmin):
+    class Meta:
+        model = Customer

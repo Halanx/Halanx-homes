@@ -2,7 +2,7 @@ from rest_framework import serializers
 from utility.serializers import DateTimeFieldTZ
 
 from Homes.models import (House, Flat, SharedRoom, PrivateRoom, HousePicture, HouseVisit,
-                          HouseAmenity, Amenity, HouseOwner, Customer, Bed, HouseMonthlyExpense, SubAmenity)
+                          HouseAmenity, Amenity, HouseOwner, Customer, Bed, HouseMonthlyExpense, SubAmenity, Space)
 
 
 class HousePictureSerializer(serializers.ModelSerializer):
@@ -50,10 +50,18 @@ class HouseOwnerBasicSerializer(serializers.ModelSerializer):
         fields = ('name', 'profile_pic')
 
 
+class SpaceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Space
+        exclude = ('visible',)
+
+
 class PrivateRoomSerializer(serializers.ModelSerializer):
+    space = SpaceSerializer()
+
     class Meta:
         model = PrivateRoom
-        exclude = ('visible',)
+        fields = '__all__'
 
 
 class BedSerializer(serializers.ModelSerializer):
@@ -63,6 +71,7 @@ class BedSerializer(serializers.ModelSerializer):
 
 
 class SharedRoomSerializer(serializers.ModelSerializer):
+    space = SpaceSerializer()
     beds = serializers.SerializerMethodField()
     bed_count = serializers.IntegerField()
     free_bed_count = serializers.IntegerField()
@@ -77,10 +86,11 @@ class SharedRoomSerializer(serializers.ModelSerializer):
 
 
 class FlatSerializer(serializers.ModelSerializer):
+    space = SpaceSerializer()
+
     class Meta:
         model = Flat
-        exclude = ('visible',)
-
+        fields = '__all__'
 
 
 class HouseDetailSerializer(serializers.ModelSerializer):
@@ -99,15 +109,15 @@ class HouseDetailSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_private_rooms(obj):
-        return PrivateRoomSerializer(obj.private_rooms.filter(visible=True)).data
+        return PrivateRoomSerializer(obj.private_rooms.filter(space__visible=True), many=True).data
 
     @staticmethod
     def get_shared_rooms(obj):
-        return SharedRoomSerializer(obj.shared_rooms.filter(visible=True)).data
+        return SharedRoomSerializer(obj.shared_rooms.filter(space__visible=True), many=True).data
 
     @staticmethod
     def get_flats(obj):
-        return FlatSerializer(obj.flats.filter(visible=True)).data
+        return FlatSerializer(obj.flats.filter(space__visible=True), many=True).data
 
 
 class HouseListSerializer(serializers.ModelSerializer):
