@@ -13,9 +13,10 @@ from Contact.api.serializers import (
 @api_view(['POST'])
 def ContactformSubmittion(request):
     if request.method=='POST':
-        submit = FormSubmitionSerializer(data=request.data)
 
+        submit = FormSubmitionSerializer(data=request.data)
         if submit.is_valid():
             submit.save()
         return Response(submit.data,status=status.HTTP_201_CREATED)
+
 

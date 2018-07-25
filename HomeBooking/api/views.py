@@ -45,7 +45,6 @@ class BookingListCreateView(ListCreateAPIView):
 
     """
 
-
     serializer_class = BookingSerializer
     queryset = Booking.objects.all()
     permission_classes = [IsAuthenticated, ]

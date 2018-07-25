@@ -1,15 +1,15 @@
 from django.db.models import Q
 from rest_framework import status
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.generics import (RetrieveAPIView, ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView,
                                      get_object_or_404)
-
-from Homes.api.serializers import (HouseVisitSerializer, HouseDetailSerializer, HouseListSerializer,
-                                   HouseVisitListSerializer)
-from Homes.models import House, Customer, HouseVisit
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from utility.time_utils import get_datetime
+
+from Homes.models import House, Customer, HouseVisit
+from Tenants.serializers import (HouseVisitSerializer, HouseDetailSerializer, HouseListSerializer,
+                                 HouseVisitListSerializer)
 
 
 class HouseListView(ListAPIView):
