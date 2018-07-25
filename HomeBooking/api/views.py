@@ -41,7 +41,11 @@ class BookingdetailView(RetrieveAPIView):
 class BookingListCreateView(ListCreateAPIView):
 
     serializer_class = BookingSerializer
+    queryset = Booking.objects.all()
     permission_classes = [IsAuthenticated, ]
     authentication_classes = [BasicAuthentication, TokenAuthentication]
 
-    # def create(self, request, *args, **kwargs):
+    def create(self, request, *args, **kwargs):
+        data = dict(request.data)
+        serializer = BookingSerializer(data=data)
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
