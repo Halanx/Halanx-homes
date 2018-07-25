@@ -40,6 +40,12 @@ class BookingdetailView(RetrieveAPIView):
 
 class BookingListCreateView(ListCreateAPIView):
 
+    """
+    POST: For creating the bookings
+
+    """
+
+
     serializer_class = BookingSerializer
     queryset = Booking.objects.all()
     permission_classes = [IsAuthenticated, ]
