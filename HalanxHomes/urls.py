@@ -20,15 +20,11 @@ from django.contrib import admin
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
 
-import Homes.urls
-import FAQ.urls
-import Contact.urls
+import Houses.urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('homes/', include(Homes.urls)),
-    path('faqs/', include(FAQ.urls)),
-    path('contact/', include(Contact.urls)),
+    path('houses/', include(Houses.urls)),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

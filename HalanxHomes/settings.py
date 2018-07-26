@@ -43,10 +43,11 @@ INSTALLED_APPS = [
     'multiselectfield',
 
     # apps
-    'Homes',
-    'FAQ',
-    'Contact'
-
+    'Common',
+    'Houses',
+    'Owners',
+    'Tenants',
+    'Bookings'
 ]
 
 MIDDLEWARE = [
